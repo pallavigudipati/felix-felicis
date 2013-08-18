@@ -1,28 +1,16 @@
 #include "sudoku.h"
 
 #include <math.h>
+#include <stdlib.h>
 #include <fstream>
 
 using namespace std;
 
 bool Sudoku::PreliminaryChecks() {
 	// Subsize check.
-	if (SIZE % SUBSIZE != 0) {
-		cout << "ERROR : Given pair of SIZE and SUBSIZE is not possible." << endl;
+	if (SIZE != pow(SUBSIZE, 2)) {
+		cout << "ERROR : Given SIZE is not possible." << endl;
 		return false;
-	}
-
-	// Data check
-	if (data_.size() != SIZE) {
-		cout << "ERROR : Incorrect data." << endl;
-		return false;
-	}
-
-	for (int i = 0; i < SIZE; ++i) {
-		if (data_[i].size() != SIZE) {
-			cout << "ERROR : Incorrect data." << endl;
-			return false;
-		}
 	}
 
 	// Symbol check.
@@ -201,7 +189,11 @@ void Sudoku::ShuffleBox(int box_number, vector<int> new_positions) {
 			it++;
 		}
 	}
-	cout << "Shuffle : " << box_number << endl;
+	cout << "Shuffle : " << box_number << " : ";
+	PrintVector(box_copy);
+	cout << "   to    ";
+	PrintVector(new_positions);
+	cout << endl;
 }
 
 void Sudoku::Rotate(bool row, int line) {
@@ -291,6 +283,10 @@ void Sudoku::LoadData(string filename) {
 	for (int i = 0; i < SIZE; ++i) {
 		vector<int> row;
 		for (int j = 0; j < SIZE; ++j) {
+			if (input.eof()) {
+				cout << "ERROR : Improper input." << endl;
+				exit(EXIT_FAILURE);
+			}
 			int value;
 			input >> value;
 			row.push_back(value);
@@ -298,4 +294,11 @@ void Sudoku::LoadData(string filename) {
 		data_.push_back(row);
 	}
 	input.close();
+}
+
+
+void Sudoku::PrintVector(vector<int> input) {
+	for (int i = 0; i < input.size(); ++i) {
+		cout << input[i] << " ";
+	}
 }

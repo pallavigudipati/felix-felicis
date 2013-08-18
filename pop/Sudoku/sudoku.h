@@ -1,3 +1,4 @@
+#include <math.h>
 #include <iostream>
 #include <vector>
 #include <map>
@@ -5,8 +6,8 @@
 
 using namespace std;
 
-#define SUBSIZE 3
 #define SIZE 9
+#define SUBSIZE (int)(sqrt(SIZE))
 
 class Sudoku {
   public:
@@ -29,6 +30,7 @@ class Sudoku {
 	void LastShuffle();
 	vector<int> GetPerfectPositions(int box_number);
 	void Print();
+	void PrintVector(vector<int> input);
 
   private:
 	vector<vector<int> > data_;
