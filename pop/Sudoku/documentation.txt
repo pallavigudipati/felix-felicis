@@ -1,0 +1,21 @@
+﻿/* Author : Pallavi Gudipati
+ *	      CS11B044
+ *
+ * Documentation for the package Sudoku.
+ * Sudoku takes an arbitrarily filled sudoku and solves it(if it's solvable).
+ * It also prints the steps taken.
+ */
+
+The formats for input and output, and the various errors possible are specified in README.
+
+sudoku.h
+
+Declares the class Sudoku.
+The macro SIZE specifies the size of the sudoku. The default value is 9.
+The private variables are:
+
+
+sudoku.cpp
+
+Defines all the functions specified in the class Sudoku
+

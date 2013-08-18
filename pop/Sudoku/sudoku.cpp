@@ -1,3 +1,8 @@
+/* Author : Pallavi Gudipati
+ * 			CS11B044
+ * sudoku.cpp : Definitions of the functions declared in
+ * 				sudoku.h
+ */
 #include "sudoku.h"
 
 #include <math.h>

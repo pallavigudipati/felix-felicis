@@ -1,3 +1,8 @@
+/* Author : Pallavi Gudipati
+ * 			CS11B044
+ * sudoku.h : Declaration of class Sudoku.
+ */
+
 #include <math.h>
 #include <iostream>
 #include <vector>

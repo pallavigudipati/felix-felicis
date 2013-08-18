@@ -1,3 +1,7 @@
+/* Author : Pallavi Gudipati
+ * 			CS11B044
+ * sudoku_main.cpp : Main file of the package.
+ */
 #include <iostream>
 #include <fstream>
 #include "sudoku.cpp"
