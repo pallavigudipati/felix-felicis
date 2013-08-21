@@ -8,14 +8,38 @@
 
 The formats for input and output, and the various errors possible are specified in README.
 
+Specifications
+Input : A sudoku filled with arbitrary symbols.
+Moves allowed :
+Rotate : Rotation of a row or a column. For convenience, only left-rotate of a row and down-rotate of a column are allowed. Right-rotate and up-rotate can be achieved by aforementioned moves.
+Shuffle (Permute) : Arbitrary permutation of any box. (for example : any 3x3 box in a sudoku of size 9).
+
+Algorithm
+The basic idea is that given any sudoku that has the appropriate number occurrences of valid symbols, it can be solved.
+The reason behind this is that we can swap any two symbols in the given sudoku without changing the positions of all the other symbols.
+
 sudoku.h
 
 Declares the class Sudoku.
 The macro SIZE specifies the size of the sudoku. The default value is 9.
 The private variables are:
-
+inventory_ : Stores the quantity of each symbol in a box.
+data_ : Stores all the input data.
 
 sudoku.cpp
 
 Defines all the functions specified in the class Sudoku
+All the functions are public, and they can be broadly classified under three major groups : 
+Data utilities : handling of data.
+1. LoadData
+		Loads data from the input.txt to data_.
+2. Print
+Prints the whole sudoku at it's present form to the stdout.
+3. PrintVector
+Prints any given vector of integers to the stdout.
+4. PrintInventory
+Prints the total number of occurrences of each symbol to the stdout. 
 
+Program utilities : specific to this program.
+Program routines : implementation of the algorithm.
+1. CheckLegitimate
