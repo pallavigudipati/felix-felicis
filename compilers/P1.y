@@ -1,4 +1,5 @@
 %{
+#define SIZE 10000
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,44 +23,126 @@ struct MacroNodeTemp {
 
 typedef struct MacroNodeTemp MacroNode;
 
+void AddArgs (MacroNode* node, char* arg);
+char* Replace(char* id, char* val, char* string);
+char* MakeExpansion(MacroNode* node, char* args);
+void MakeMacroNode (char* macro, char* arguments, char* expansion);
+MacroNode* Search(char* id);
+
 MacroNode* sentinel = NULL;
 MacroNode* current = NULL;
 
-void MakeMacroNode (char* macro, char* expansion) {
+void AddArgs (MacroNode* mnode, char* arg) {
+	Arg* node;
+	node = (Arg*) malloc(sizeof(Arg));
+	node->Name = malloc(SIZE);
+	sprintf(node->Name, "%s", arg);
+	node->Next = NULL;
+	mnode->num_args++;
+	if (mnode->args_sentinel == NULL) {
+		mnode->args_sentinel = node;
+		mnode->args_current = node;
+	} else {
+		mnode->args_current->Next = node;
+		mnode->args_current = mnode->args_current->Next;
+	}
+}
+
+void MakeMacroNode (char* macro, char* arguments, char* expansion) {
 	MacroNode* node;
 	node = (MacroNode*) malloc(sizeof(MacroNode));
-	node->Macro = (char*) malloc(strlen(macro));	
+	node->Next = NULL;
+	node->num_args = 0;
+	node->args_sentinel = NULL;
+	node->args_current = NULL;
+
+	// !!!!!!!!!!!!! use something else instead of size.
+	node->Macro = (char*) malloc(SIZE);
 	strcpy(node->Macro, macro);
-	node->Expansion = (char*) malloc(strlen(expansion));	
+	node->Expansion = (char*) malloc(SIZE);	
 	strcpy(node->Expansion, expansion);
+		
 	if (sentinel == NULL) {
 		sentinel = current = node;
 	} else {
 		current->Next = node;
 		current = current->Next;
 	}
-	node->Next = NULL;
-	node->num_args = 0;
-	node->args_sentinel = NULL;
-	node->args_current = NULL;
-}
 
-void AddArgs (char* arg) {
-	Arg* node;
-	node = (Arg*) malloc(sizeof(Arg));
-	node->Name = malloc(strlen(arg));
-	strcpy(node->Name, arg);
-	node->Next = NULL;
-	current->num_args++;
-	if (current->args_sentinel == NULL) {
-		current->args_sentinel = node;
-		current->args_current = node;
-	} else {
-		current->args_current->Next = node;
-		current->args_current = current->args_current->Next;
+	// Adding arguments.
+	char* arg;
+	// printf("!!!!!!!!!!!%s %s", node->Macro, node->Expansion);
+	arg = strtok (arguments,",");
+	while (arg != NULL) {
+		// printf("A-%s", arg);
+		AddArgs(node, arg);
+		arg = strtok (NULL, ",");
 	}
+	// printf("\n");
 }
 
+MacroNode* Search(char* id) {
+	MacroNode* macro = sentinel;
+	while (macro != NULL) {
+		if (!strcmp(macro->Macro, id)) {
+			return macro;
+		}
+		macro = macro->Next;
+	}
+	return NULL;
+}
+
+char* Replace(char* id, char* val, char* string) {
+	// printf("FNREP : %s %s %s \n", id, val, string);
+	char* output = (char*) malloc(SIZE);
+	char* input = (char*) malloc(SIZE);
+	sprintf(input, "%s", string);
+	char* remaining = (char*) malloc(SIZE);
+	sprintf(output, "");
+	int span = 0;
+	span = strlen(id);
+	char* temp = (char*) malloc(SIZE);
+	char* modifiedval = (char*) malloc(SIZE);
+
+	MacroNode* nested = Search(val);
+	if (nested == NULL) {
+		sprintf(modifiedval, "%s", val);
+	} else {
+		sprintf(modifiedval, "%s", MakeExpansion(nested, ""));
+	}
+	
+	char* mark;
+	mark = strstr(input, id);
+	while (mark != NULL && strcmp(input, "\0")) {
+		sprintf(remaining, "%s", mark + span);
+		strncpy(mark, "\0", 1);
+		sprintf(temp, "%s", input);
+		strcat(output, temp);
+		strcat(output, modifiedval);
+		sprintf(input, "%s", remaining);
+		mark = strstr(input, id);
+	}
+	strcat(output, input);
+	// printf("%s \n", output);
+	
+	return output;
+}
+
+char* MakeExpansion(MacroNode* node, char* args) {
+	Arg* curr = node->args_sentinel;
+	char* val;
+	char* temp = (char*) malloc(SIZE);
+	sprintf(temp, "%s", node->Expansion);
+	val = strtok (args,",");
+	while (curr != NULL && val != NULL) {
+		// printf("REP : %s %s\n", curr->Name, val);
+		sprintf(temp, "%s", Replace(curr->Name, val, temp));
+		// printf("HEY %s\n", temp);
+		val = strtok (NULL, ",");
+		curr = curr->Next; 
+	}
+	return temp;
+}
 
 %}
 
@@ -106,117 +189,147 @@ void AddArgs (char* arg) {
 %type <str>  Identifier GOAL MainClass TypeDecStar TypeDec MethodDecStar MethodDec QTICTI TICTI CTypeIDStar TypeIDColonStar Type StatementStar Statement Exp QExpCExp ExpCExp CExpStar PExp MacroDefStar MacroDef MacDefStatement MacDefExp QIDCID IDCID CIDStar 
 
 %%
-GOAL: MacroDefStar MainClass TypeDecStar
+GOAL: MacroDefStar MainClass TypeDecStar {printf("%s %s %s", $1, $2, $3); free($1); free($2); free($3);}
 ;
 
-MainClass: CLASS Identifier OFPAREN PUBLIC STATIC VOID MAIN OPAREN STRING OSPAREN CSPAREN Identifier CPAREN OFPAREN PRINT OPAREN Exp CPAREN COLON CFPAREN CFPAREN
+MainClass: CLASS Identifier OFPAREN PUBLIC STATIC VOID MAIN OPAREN STRING OSPAREN CSPAREN Identifier CPAREN OFPAREN PRINT OPAREN Exp CPAREN COLON CFPAREN CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s {public static void main ( String[] %s ) {System.out.println(%s);}}", $2, $12,$17); free($2); free($12); free($17);}
 ;
 
-TypeDecStar: 
-| TypeDecStar TypeDec
+TypeDecStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| TypeDecStar TypeDec {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
 ;
 
-TypeDec: CLASS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN
-| CLASS Identifier EXTENDS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN
+TypeDec: CLASS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s {%s %s}\n", $2, $4, $5); free($2); free($4); free($5);}
+| CLASS Identifier EXTENDS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s extends %s {%s %s}\n", $2, $4, $6, $7); free($2); free($4); free($6); free($7);}
 ;
 
-MethodDecStar:
-| MethodDecStar MethodDec
+MethodDecStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| MethodDecStar MethodDec {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
 ;
 
-MethodDec: PUBLIC Type Identifier OPAREN QTICTI CPAREN OFPAREN TypeIDColonStar StatementStar RETURN Exp COLON CFPAREN
+MethodDec: PUBLIC Type Identifier OPAREN QTICTI CPAREN OFPAREN TypeIDColonStar StatementStar RETURN Exp COLON CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "public %s %s (%s) {%s %s return %s;}\n", $2, $3, $5, $8, $9, $11); free($2); free($3); free($5); free($8); free($9); free($11);}
 ;
 
-QTICTI:
-| TICTI
+QTICTI: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| TICTI {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
 ;
 
-TICTI: Type Identifier CTypeIDStar
+TICTI: Type Identifier CTypeIDStar {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s %s", $1, $2, $3); free($1); free($2); free($3);}
 ;
 
-CTypeIDStar:
-| CTypeIDStar COMMA Type ID
+CTypeIDStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| CTypeIDStar COMMA Type Identifier {$$ = (char*) malloc(SIZE); sprintf($$, "%s, %s %s", $1, $3, $4); free($1); free($3); free($4);}
 ;
 
-TypeIDColonStar:
-| TypeIDColonStar Type Identifier COLON
+TypeIDColonStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| TypeIDColonStar Type Identifier COLON {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s %s;\n", $1, $2, $3); free($1); free($2); free($3);}
 ;
 
-Type: INT OSPAREN CSPAREN
-| BOOL
-| INT
+Type: INT OSPAREN CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "int[]");}
+| BOOL {$$ = (char*) malloc(SIZE); sprintf($$, "boolean");}
+| INT {$$ = (char*) malloc(SIZE); sprintf($$, "int");}
 ;
 
-StatementStar:
-| StatementStar Statement
+StatementStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| StatementStar Statement {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
 ;
 
-Statement: OFPAREN StatementStar CFPAREN
-| PRINT OPAREN Exp CPAREN COLON
-| Identifier EQUALTO Exp COLON 
-| Identifier OSPAREN Exp CSPAREN EQUALTO Exp COLON
-| IF OPAREN Exp CPAREN Statement
-| IF OPAREN Exp CPAREN Statement ELSE Statement
-| WHILE OPAREN Exp CPAREN Statement
-| Identifier OPAREN QExpCExp CPAREN COLON
+Statement: OFPAREN StatementStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "{%s}\n", $2); free($2);}
+| PRINT OPAREN Exp CPAREN COLON {$$ = (char*) malloc(SIZE); sprintf($$, "System.out.println(%s);\n", $3); free($3);}
+| Identifier EQUALTO Exp COLON {$$ = (char*) malloc(SIZE); sprintf($$, "%s = %s;\n", $1, $3); free($1); free($3);}
+| Identifier OSPAREN Exp CSPAREN EQUALTO Exp COLON {$$ = (char*) malloc(SIZE); sprintf($$, "%s[%s] = %s;\n", $1, $3, $6); free($1);
+													free($3); free($6);}
+| IF OPAREN Exp CPAREN Statement {$$ = (char*) malloc(SIZE); sprintf($$, "if (%s) %s", $3, $5); free($3); free($5);}
+| IF OPAREN Exp CPAREN Statement ELSE Statement {$$ = (char*) malloc(SIZE); sprintf($$, "if (%s) %s else %s", $3, $5, $7 ); free($3);
+												 free($5); free($7);}
+| WHILE OPAREN Exp CPAREN Statement {$$ = (char*) malloc(SIZE); sprintf($$, "while (%s) %s", $3, $5); free($3); free($5);}
+| Identifier OPAREN QExpCExp CPAREN COLON {$$ = (char*) malloc(SIZE); // sprintf($$, "%s(%s);\n", $1, $3); 
+	MacroNode* macst = Search($1);
+	// printf("$$ %s %s A-%s\n", macst->Macro, macst->Expansion, macst->args_sentinel->Name);
+	if (macst != NULL) {
+		sprintf($$, "%s;", MakeExpansion(macst, $3));
+		//sprintf($$, "%s;",  $3);
+	} else {
+		sprintf($$, "%s(%s)", $1, $3);
+	}
+	free($1); free($3);}
 ;
 
-Exp: PExp BOP PExp 
-| PExp OSPAREN PExp CSPAREN 
-| PExp DOT LEN
-| PExp
-| PExp DOT Identifier OPAREN QExpCExp CPAREN
-| Identifier OPAREN QExpCExp CPAREN
+Exp: PExp BOP PExp {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s %s", $1, $2, $3); 
+		 			// printf("# %s # %s # %s\n", $1, $2, $3);	
+		 			free($1); free($3);
+	 				}
+| PExp OSPAREN PExp CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "%s [%s]", $1, $3); free($1); free($3);}
+| PExp DOT LEN {$$ = (char*) malloc(SIZE); sprintf($$, "%s.length", $1); free($1);}
+| PExp {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
+| PExp DOT Identifier OPAREN QExpCExp CPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "%s.%s(%s)", $1, $3, $5); free($1); free($3); free($5);}
+| Identifier OPAREN QExpCExp CPAREN {$$ = (char*) malloc(SIZE); //sprintf($$, "%s(%s)", $1, $3); free($1); free($3);}
+	MacroNode* macst = Search($1);
+	if (macst != NULL) {
+		sprintf($$, "%s", MakeExpansion(macst, $3));
+	} else {
+		sprintf($$, "%s(%s)", $1, $3);
+	}
+	free($1); free($3);}	
 ;
 
-QExpCExp:
-| ExpCExp
+QExpCExp: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| ExpCExp {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
 ;
 
-ExpCExp: Exp CExpStar
+ExpCExp: Exp CExpStar {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
 ;
 
-CExpStar:
-| CExpStar COMMA Exp
+CExpStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| CExpStar COMMA Exp {$$ = (char*) malloc(SIZE); sprintf($$, "%s,%s", $1, $3); free($1); free($3);}
 ;
 
-PExp: NUM
-| BOOLVAL 
-| Identifier {/*printf("!%s\n",$1);*/} 
-| THIS
-| NEW INT OSPAREN Exp CSPAREN
-| NEW Identifier OPAREN CPAREN
-| NOT Exp
-| OPAREN Exp CPAREN
+PExp: NUM {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1);}
+| BOOLVAL {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1);}
+| Identifier {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
+| THIS {$$ = (char*) malloc(SIZE); sprintf($$, "this");}
+| NEW INT OSPAREN Exp CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "new int[%s]", $4); free($4);}
+| NEW Identifier OPAREN CPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "new %s()", $2); free($2);}
+| NOT Exp {$$ = (char*) malloc(SIZE); sprintf($$, "!%s", $2); free($2);}
+| OPAREN Exp CPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "(%s)", $2); free($2);}
 ;
 
-MacroDefStar:
-| MacroDefStar MacroDef
+MacroDefStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| MacroDefStar MacroDef {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
 ;
 
-MacroDef: MacDefExp
-| MacDefStatement
+MacroDef: MacDefExp {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
+| MacDefStatement {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
 ;
 
-MacDefStatement: HASH_DEFINE Identifier OPAREN QIDCID CPAREN OFPAREN StatementStar CFPAREN {}
+MacDefStatement: HASH_DEFINE Identifier OPAREN QIDCID CPAREN OFPAREN StatementStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "");
+	char* macstate = (char*) malloc(SIZE);
+	sprintf(macstate,"{%s}",$7);
+	MakeMacroNode($2, $4, macstate);	
+	free($2); free($4); free($7); free(macstate);
+	}
 ;
 
-MacDefExp: HASH_DEFINE Identifier OPAREN QIDCID CPAREN OPAREN Exp CPAREN {//printf("%s\n", $2);}
-}
+MacDefExp: HASH_DEFINE Identifier OPAREN QIDCID CPAREN OPAREN Exp CPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "");
+	char* macexp = (char*) malloc(SIZE);
+	sprintf(macexp,"(%s)", $7);
+	MakeMacroNode($2, $4, macexp);
+	free($2); free($4); free($7); free(macexp);
+	}
 ;
 
-QIDCID: 
-| IDCID
+QIDCID: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| IDCID {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
 ;
 
-IDCID: Identifier CIDStar
+IDCID: Identifier CIDStar {$$ = (char*) malloc(SIZE); sprintf($$, "%s%s", $1, $2); free($1); free($2);}
 ;
 
-CIDStar:
-| CIDStar COMMA ID
+CIDStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
+| CIDStar COMMA Identifier {$$ = (char*) malloc(SIZE); sprintf($$, "%s,%s", $1, $3); free($1); free($3);}
 ;
 
-Identifier: ID {}
+Identifier: ID {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1);}
 ;
 %%
 
@@ -227,5 +340,5 @@ main (int argc, char** argv) {
 }
 
 yyerror (char* s) {
-	printf("Error\n");
+	printf("// Failed to parse macrojava code.\n");
 }

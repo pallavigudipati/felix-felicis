@@ -20,11 +20,16 @@
 "{" {return OFPAREN;}
 "}" {return CFPAREN;}
      
-"=" {printf("=\n");return EQUALTO;}
+"=" {return EQUALTO;}
 "!" {return NOT;}
-("-"|"&"|"<"|"+"|"*"|"/") {yylval.str = yytext;
-							//printf("%s\n",yytext);
-		  				   return BOP;}
+
+"+" {yylval.str = "+\0"; return BOP;}
+"&" {yylval.str = "&\0"; return BOP;}
+"<" {yylval.str = "<\0"; return BOP;}
+"-" {yylval.str = "-\0"; return BOP;}
+"*" {yylval.str = "*\0"; return BOP;}
+"/" {yylval.str = "/\0"; return BOP;}
+
 "length" {return LEN;}
 "true" {yylval.str = yytext;
 		return BOOLVAL;}
@@ -39,7 +44,7 @@
 "main" {return MAIN;}
 "extends" {return EXTENDS;}
 "return" {return RETURN;}
-"this" {printf("this\n");
+"this" {//printf("this\n");
 		return THIS;}
 "new" {return NEW;}
 "int" {return INT;}
@@ -47,17 +52,17 @@
 
 ";" {return COLON;}
 "," {return COMMA;}
-"." {printf("dot\n");return DOT;}
+"." {return DOT;}
 
 ("//".*\n) {/*Another type of comment*/}
 
 [ \n\t] {}
 
-[a-zA-Z_][a-zA-Z_0-9]* {printf("%s\n",yytext);
+[a-zA-Z_][a-zA-Z_0-9]* {//printf("%s\n",yytext);
 						yylval.str = yytext;
 						return ID;}
 [0-9]+ {yylval.str = yytext;
-		printf("%s\n",yytext);
+		// printf("%s\n",yytext);
 		// yylval.num = atoi(yytext);
 		return NUM;}
 
