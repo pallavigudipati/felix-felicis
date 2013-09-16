@@ -192,15 +192,15 @@ char* MakeExpansion(MacroNode* node, char* args) {
 GOAL: MacroDefStar MainClass TypeDecStar {printf("%s %s %s", $1, $2, $3); free($1); free($2); free($3);}
 ;
 
-MainClass: CLASS Identifier OFPAREN PUBLIC STATIC VOID MAIN OPAREN STRING OSPAREN CSPAREN Identifier CPAREN OFPAREN PRINT OPAREN Exp CPAREN COLON CFPAREN CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s {public static void main ( String[] %s ) {System.out.println(%s);}}", $2, $12,$17); free($2); free($12); free($17);}
+MainClass: CLASS Identifier OFPAREN PUBLIC STATIC VOID MAIN OPAREN STRING OSPAREN CSPAREN Identifier CPAREN OFPAREN PRINT OPAREN Exp CPAREN COLON CFPAREN CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s {public static void main ( String[] %s ) {System.out.println(%s);}}", $2, $12,$17); free($12); free($17);}
 ;
 
 TypeDecStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
 | TypeDecStar TypeDec {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
 ;
 
-TypeDec: CLASS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s {%s %s}\n", $2, $4, $5); free($2); free($4); free($5);}
-| CLASS Identifier EXTENDS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s extends %s {%s %s}\n", $2, $4, $6, $7); free($2); free($4); free($6); free($7);}
+TypeDec: CLASS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s {%s %s}\n", $2, $4, $5); free($4); free($5);}
+| CLASS Identifier EXTENDS Identifier OFPAREN TypeIDColonStar MethodDecStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "class %s extends %s {%s %s}\n", $2, $4, $6, $7); free($6); free($7);}
 ;
 
 MethodDecStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
@@ -225,13 +225,14 @@ TypeIDColonStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
 | TypeIDColonStar Type Identifier COLON {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s %s;\n", $1, $2, $3); free($1); free($2); free($3);}
 ;
 
-Type: INT OSPAREN CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "int[]");}
+Type:  INT OSPAREN CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "int[]");}
 | BOOL {$$ = (char*) malloc(SIZE); sprintf($$, "boolean");}
 | INT {$$ = (char*) malloc(SIZE); sprintf($$, "int");}
+| Identifier {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1);}
 ;
 
 StatementStar: {$$ = (char*) malloc(SIZE); sprintf($$, "");}
-| StatementStar Statement {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
+| Statement StatementStar {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s", $1, $2); free($1); free($2);}
 ;
 
 Statement: OFPAREN StatementStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "{%s}\n", $2); free($2);}
@@ -337,6 +338,15 @@ main (int argc, char** argv) {
 	do {
 		yyparse();
 	} while(!feof(yyin));
+/*Type:  INT OSPAREN CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "int[]");}
+| BOOL {$$ = (char*) malloc(SIZE); sprintf($$, "boolean");}
+| INT {$$ = (char*) malloc(SIZE); sprintf($$, "int");}
+Type: BOOL {$$ = (char*) malloc(SIZE); sprintf($$, "boolean");}
+| INT {$$ = (char*) malloc(SIZE); sprintf($$, "int");}
+| Identifier {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
+| Type OSPAREN CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "%s[]", $1); free($1);}
+;
+;*/
 }
 
 yyerror (char* s) {

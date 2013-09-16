@@ -1,21 +1,42 @@
-/* Author : Pallavi Gudipati
- * 			CS11B044
- * sudoku.cpp : Definitions of the functions declared in
- * 				sudoku.h
- */
 #include "sudoku.h"
 
 #include <math.h>
-#include <stdlib.h>
 #include <fstream>
 
 using namespace std;
 
+void Sudoku::LoadData(string filename) {
+	ifstream input(filename.c_str());
+	for (int i = 0; i < SIZE; ++i) {
+		vector<int> row;
+		for (int j = 0; j < SIZE; ++j) {
+			int value;
+			input >> value;
+			row.push_back(value);
+		}
+		data_.push_back(row);
+	}
+	input.close();
+}
+
 bool Sudoku::PreliminaryChecks() {
 	// Subsize check.
-	if (SIZE != pow(SUBSIZE, 2)) {
-		cout << "ERROR : Given SIZE is not possible." << endl;
+	if (SIZE % SUBSIZE != 0 || pow(SUBSIZE, 2) != SIZE) {
+		cout << "ERROR : Given pair of SIZE and SUBSIZE is not possible." << endl;
 		return false;
+	}
+
+	// Data check
+	if (data_.size() != SIZE) {
+		cout << "ERROR : Incorrect data." << endl;
+		return false;
+	}
+
+	for (int i = 0; i < SIZE; ++i) {
+		if (data_[i].size() != SIZE) {
+			cout << "ERROR : Incorrect data." << endl;
+			return false;
+		}
 	}
 
 	// Symbol check.
@@ -198,7 +219,7 @@ void Sudoku::ShuffleBox(int box_number, vector<int> new_positions) {
 	PrintVector(box_copy);
 	cout << "   to    ";
 	PrintVector(new_positions);
-	cout << endl;
+    cout << endl;
 }
 
 void Sudoku::Rotate(bool row, int line) {
@@ -282,25 +303,6 @@ void Sudoku::Print() {
 	}
 	cout << endl;
 }
-
-void Sudoku::LoadData(string filename) {
-	ifstream input(filename.c_str());
-	for (int i = 0; i < SIZE; ++i) {
-		vector<int> row;
-		for (int j = 0; j < SIZE; ++j) {
-			if (input.eof()) {
-				cout << "ERROR : Improper input." << endl;
-				exit(EXIT_FAILURE);
-			}
-			int value;
-			input >> value;
-			row.push_back(value);
-		}
-		data_.push_back(row);
-	}
-	input.close();
-}
-
 
 void Sudoku::PrintVector(vector<int> input) {
 	for (int i = 0; i < input.size(); ++i) {
