@@ -24,7 +24,7 @@ struct MacroNodeTemp {
 typedef struct MacroNodeTemp MacroNode;
 
 void AddArgs (MacroNode* node, char* arg);
-char* Replace(char* id, char* val, char* string);
+char* Replace(char* id, char* val, char* string, int step, int num);
 char* MakeExpansion(MacroNode* node, char* args);
 void MakeMacroNode (char* macro, char* arguments, char* expansion);
 MacroNode* Search(char* id);
@@ -92,7 +92,7 @@ MacroNode* Search(char* id) {
 	return NULL;
 }
 
-char* Replace(char* id, char* val, char* string) {
+char* Replace(char* id, char* val, char* string, int step, int num) {
 	// printf("FNREP : %s %s %s \n", id, val, string);
 	char* output = (char*) malloc(SIZE);
 	char* input = (char*) malloc(SIZE);
@@ -100,19 +100,28 @@ char* Replace(char* id, char* val, char* string) {
 	char* remaining = (char*) malloc(SIZE);
 	sprintf(output, "");
 	int span = 0;
-	span = strlen(id);
 	char* temp = (char*) malloc(SIZE);
 	char* modifiedval = (char*) malloc(SIZE);
+	char* modifiedid = (char*) malloc(SIZE);
 
 	MacroNode* nested = Search(val);
 	if (nested == NULL) {
-		sprintf(modifiedval, "%s", val);
+		if (!step) {
+			sprintf(modifiedval, "@[%d]", num + 1000);
+			sprintf(modifiedid, "%s", id);
+		} else {
+			sprintf(modifiedval, "%s", val);
+			sprintf(modifiedid, "@[%d]", num + 1000);
+		}
 	} else {
 		sprintf(modifiedval, "%s", MakeExpansion(nested, ""));
+		sprintf(modifiedid, "%s", id);
 	}
+	// printf("#%s %s %s %s\n",id, modifiedid, val, modifiedval);	
+	span = strlen(modifiedid);
 	
 	char* mark;
-	mark = strstr(input, id);
+	mark = strstr(input, modifiedid);
 	while (mark != NULL && strcmp(input, "\0")) {
 		sprintf(remaining, "%s", mark + span);
 		strncpy(mark, "\0", 1);
@@ -120,7 +129,7 @@ char* Replace(char* id, char* val, char* string) {
 		strcat(output, temp);
 		strcat(output, modifiedval);
 		sprintf(input, "%s", remaining);
-		mark = strstr(input, id);
+		mark = strstr(input, modifiedid);
 	}
 	strcat(output, input);
 	// printf("%s \n", output);
@@ -132,15 +141,34 @@ char* MakeExpansion(MacroNode* node, char* args) {
 	Arg* curr = node->args_sentinel;
 	char* val;
 	char* temp = (char*) malloc(SIZE);
+	char* argtemp = (char*) malloc(SIZE);
 	sprintf(temp, "%s", node->Expansion);
+	sprintf(argtemp,"%s",args);
 	val = strtok (args,",");
+	int it = 0;
 	while (curr != NULL && val != NULL) {
-		// printf("REP : %s %s\n", curr->Name, val);
-		sprintf(temp, "%s", Replace(curr->Name, val, temp));
-		// printf("HEY %s\n", temp);
+		//printf("REP : %s %s\n", curr->Name, val);
+		sprintf(temp, "%s", Replace(curr->Name, val, temp, 0, it));
+		//printf("HEY %s\n", temp);
 		val = strtok (NULL, ",");
 		curr = curr->Next; 
+		it++;
 	}
+	//printf("step1 %s\n", temp);
+
+	curr = node->args_sentinel;
+	val = strtok (argtemp,",");
+	it = 0;
+	while (curr != NULL && val != NULL) {
+		//printf("REP : %s %s\n", curr->Name, val);
+		sprintf(temp, "%s", Replace(curr->Name, val, temp, 1, it));
+		//printf("HEY %s\n", temp);
+		val = strtok (NULL, ",");
+		curr = curr->Next; 
+		it++;
+	}
+	//printf("step2 %s\n", temp);
+
 	return temp;
 }
 
@@ -248,7 +276,7 @@ Statement: OFPAREN StatementStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$,
 	MacroNode* macst = Search($1);
 	// printf("$$ %s %s A-%s\n", macst->Macro, macst->Expansion, macst->args_sentinel->Name);
 	if (macst != NULL) {
-		sprintf($$, "%s;", MakeExpansion(macst, $3));
+		sprintf($$, "%s", MakeExpansion(macst, $3));
 		//sprintf($$, "%s;",  $3);
 	} else {
 		sprintf($$, "%s(%s)", $1, $3);
