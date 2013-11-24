@@ -56,7 +56,7 @@ void MakeMacroNode (char* macro, char* arguments, char* expansion) {
 	node->args_sentinel = NULL;
 	node->args_current = NULL;
 
-	// !!!!!!!!!!!!! use something else instead of size.
+	// TODO use something else instead of size.
 	node->Macro = (char*) malloc(SIZE);
 	strcpy(node->Macro, macro);
 	node->Expansion = (char*) malloc(SIZE);	
@@ -71,14 +71,11 @@ void MakeMacroNode (char* macro, char* arguments, char* expansion) {
 
 	// Adding arguments.
 	char* arg;
-	// printf("!!!!!!!!!!!%s %s", node->Macro, node->Expansion);
 	arg = strtok (arguments,",");
 	while (arg != NULL) {
-		// printf("A-%s", arg);
 		AddArgs(node, arg);
 		arg = strtok (NULL, ",");
 	}
-	// printf("\n");
 }
 
 MacroNode* Search(char* id) {
@@ -93,7 +90,6 @@ MacroNode* Search(char* id) {
 }
 
 char* Replace(char* id, char* val, char* string, int step, int num) {
-	// printf("FNREP : %s %s %s \n", id, val, string);
 	char* output = (char*) malloc(SIZE);
 	char* input = (char*) malloc(SIZE);
 	sprintf(input, "%s", string);
@@ -117,7 +113,6 @@ char* Replace(char* id, char* val, char* string, int step, int num) {
 		sprintf(modifiedval, "%s", MakeExpansion(nested, ""));
 		sprintf(modifiedid, "%s", id);
 	}
-	// printf("#%s %s %s %s\n",id, modifiedid, val, modifiedval);	
 	span = strlen(modifiedid);
 	
 	char* mark;
@@ -132,7 +127,6 @@ char* Replace(char* id, char* val, char* string, int step, int num) {
 		mark = strstr(input, modifiedid);
 	}
 	strcat(output, input);
-	// printf("%s \n", output);
 	
 	return output;
 }
@@ -147,27 +141,21 @@ char* MakeExpansion(MacroNode* node, char* args) {
 	val = strtok (args,",");
 	int it = 0;
 	while (curr != NULL && val != NULL) {
-		//printf("REP : %s %s\n", curr->Name, val);
 		sprintf(temp, "%s", Replace(curr->Name, val, temp, 0, it));
-		//printf("HEY %s\n", temp);
 		val = strtok (NULL, ",");
 		curr = curr->Next; 
 		it++;
 	}
-	//printf("step1 %s\n", temp);
 
 	curr = node->args_sentinel;
 	val = strtok (argtemp,",");
 	it = 0;
 	while (curr != NULL && val != NULL) {
-		//printf("REP : %s %s\n", curr->Name, val);
 		sprintf(temp, "%s", Replace(curr->Name, val, temp, 1, it));
-		//printf("HEY %s\n", temp);
 		val = strtok (NULL, ",");
 		curr = curr->Next; 
 		it++;
 	}
-	//printf("step2 %s\n", temp);
 
 	return temp;
 }
@@ -274,10 +262,8 @@ Statement: OFPAREN StatementStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$,
 | WHILE OPAREN Exp CPAREN Statement {$$ = (char*) malloc(SIZE); sprintf($$, "while (%s) %s", $3, $5); free($3); free($5);}
 | Identifier OPAREN QExpCExp CPAREN COLON {$$ = (char*) malloc(SIZE); // sprintf($$, "%s(%s);\n", $1, $3); 
 	MacroNode* macst = Search($1);
-	// printf("$$ %s %s A-%s\n", macst->Macro, macst->Expansion, macst->args_sentinel->Name);
 	if (macst != NULL) {
 		sprintf($$, "%s", MakeExpansion(macst, $3));
-		//sprintf($$, "%s;",  $3);
 	} else {
 		sprintf($$, "%s(%s)", $1, $3);
 	}
@@ -285,7 +271,6 @@ Statement: OFPAREN StatementStar CFPAREN {$$ = (char*) malloc(SIZE); sprintf($$,
 ;
 
 Exp: PExp BOP PExp {$$ = (char*) malloc(SIZE); sprintf($$, "%s %s %s", $1, $2, $3); 
-		 			// printf("# %s # %s # %s\n", $1, $2, $3);	
 		 			free($1); free($3);
 	 				}
 | PExp OSPAREN PExp CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "%s [%s]", $1, $3); free($1); free($3);}
@@ -366,15 +351,6 @@ main (int argc, char** argv) {
 	do {
 		yyparse();
 	} while(!feof(yyin));
-/*Type:  INT OSPAREN CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "int[]");}
-| BOOL {$$ = (char*) malloc(SIZE); sprintf($$, "boolean");}
-| INT {$$ = (char*) malloc(SIZE); sprintf($$, "int");}
-Type: BOOL {$$ = (char*) malloc(SIZE); sprintf($$, "boolean");}
-| INT {$$ = (char*) malloc(SIZE); sprintf($$, "int");}
-| Identifier {$$ = (char*) malloc(SIZE); sprintf($$, "%s", $1); free($1);}
-| Type OSPAREN CSPAREN {$$ = (char*) malloc(SIZE); sprintf($$, "%s[]", $1); free($1);}
-;
-;*/
 }
 
 yyerror (char* s) {

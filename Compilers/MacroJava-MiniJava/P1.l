@@ -44,8 +44,7 @@
 "main" {return MAIN;}
 "extends" {return EXTENDS;}
 "return" {return RETURN;}
-"this" {//printf("this\n");
-		return THIS;}
+"this" {return THIS;}
 "new" {return NEW;}
 "int" {return INT;}
 "boolean" {return BOOL;}
