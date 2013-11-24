@@ -1,0 +1,43 @@
+/*
+ * Author: Pallavi Gudipati
+ * Compilers Lab
+ * Languages: Flex, Bison, Java
+ */
+
+-> Course-work from:
+	- http://www.cse.iitm.ac.in/~krishna/cs3300/cs3310.html
+
+-> Labs completed:
+	- Lab 1:
+		Macro expansion and Parsing for MacroJava.
+		- Used Flex and Bison to write a MacroJava to MiniJava translator. 
+		- Expand the macros.
+
+	- Lab 2:
+		Java Type Checker.
+		- First part of a multi part project to write an optimizing compiler for
+		  MiniJava.
+
+	- Lab 3:
+		- Intermediate Code Generation.
+	 	- Second part of a multi part project to write an optimizing compiler for
+		  MiniJava. 
+		- Converted MiniJava to MiniIR.
+	
+	- Lab 4:
+		- Simplified Intermediate Code Generation.
+		- Third part of a multi part project to write an optimizing compiler for
+		  MiniJava.
+		- Converted MiniIR to MicroIR.
+
+	- Lab 5:
+		- Register allocation.
+		- Fourth part of a multi part project to write an optimizing compiler for
+		  MiniJava.
+		- Converted MicroIR to MiniRA.
+
+	- Lab 6:
+		- Code Generation.
+		- Last part of a multi part project to write an optimizing compiler for
+		  MiniJava.
+		- Converted MicroIR to MIPS Assembly.
