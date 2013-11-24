@@ -255,8 +255,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
 	         symbolTable.put((String)symbol.getKey(), (String)symbol.getValue());
 		  }
 	      
-	      //DID replace variables of methods in case they are overwritten 
-	      // transferring methods
 	      HashMap<String, String> toPutM = new HashMap<String, String>();
 	      Set setm = methodReturn.entrySet();
 	      Iterator itm = setm.iterator();
@@ -266,9 +264,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
 	        	 temp = ((String)symbol.getKey());
 	        	 temp = temp.replace(class2 + " ", class1 + " ");
 	        	 toPutM.put(temp, (String)symbol.getValue());
-	        	 //System.out.print("MMMM " + temp + " " + arguments.get((String)symbol.getValue()));
-	        	 //System.out.print("MMM " + (String)symbol.getKey());
-	        	 //System.out.print("MMM " + arguments.get("A meth"));
 	        	 arguments.put(temp, arguments.get((String)symbol.getKey()));
 	         }
 	      }
@@ -282,7 +277,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
 	            
 	      n.f4.accept(this);
 	      n.f5.accept(this);
-	      //System.out.print("WTFFFF");
 	      n.f6.accept(this);
 	      n.f7.accept(this);
       }
@@ -291,10 +285,7 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       return _ret;
    }
    
-   // Extends ka recursive find
    public boolean FindExtend (String a, String b) {
-	   //System.out.print(a + " ####### " + b);
-	   //ystem.out.print(" ####### " + extendClass.get("A"));
 	   boolean sentinel = true;
 	   String temp = new String();
 	   temp = a;
@@ -324,26 +315,19 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f2.accept(this);
       if (!globalFlag) {
     	  // NO OVERLOADING similar thing 
-    	  //for classes and methods but keep in mind overriding
+    	  // for classes and methods but keep in mind overriding
     	  // and overloading
 	      if (!onlyForExtends) {
 	    	  if (symbolTable.get(currentClass + " " + currentMethod + " "
 	    			  			  + n.f1.f0.toString()) != null) {
-	    		  //System.out.print("Type error -20");
-		      	  //System.exit(-20);
 		    	  System.out.print("Type error");
 		    	  System.exit(-1);
 	    	  }
 	    	  symbolTable.put(currentClass + " " + currentMethod + " "
 	    			  			+ n.f1.f0.toString(), type);
-	    	  //System.out.print(type + " : " + n.f1.f0.toString());
 	      } else {
     		  if ((type != "int") && (type != "int[]") && (type != "boolean") &&
     				  !classes.contains(type)) {
-    			  //System.out.print(type);
-    			  //System.out.print(classes.contains(type));
-        		  //System.out.print("Type error -30");
-    	      	  //System.exit(-30);
     	    	  System.out.print("Type error");
     	    	  System.exit(-1);
     		  }
@@ -381,26 +365,18 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       if (!globalFlag) {
     	  if (!enteringExtends && !onlyForExtends) {
 	    	  if (methodReturn.get(currentClass + " " + currentMethod) != null) {
-		    	  //System.out.print("Type error -26");
-				  //System.exit(-26); 
 		    	  System.out.print("Type error");
 		    	  System.exit(-1);
 	    	  }
 		      methodReturn.put(currentClass + " " + currentMethod, type);
-		      //System.out.print(currentClass + " " + currentMethod + " " + type);
     	  } else if (enteringExtends && onlyForExtends) {
-    		  //System.out.print("@"+currentClass + " " + currentMethod);
     		  if (methodReturn.get(currentClass + " " + currentMethod) != null) {
-    			  //System.out.print("@"+methodReturn.get(currentClass + " " +
-				//				currentMethod));
     			   if (!Match(type, methodReturn.get(currentClass + " " +
     					   								currentMethod))) {
     			    	  System.out.print("Type error");
     			      	  System.exit(-1);
     			   }
     			   params = arguments.get(currentClass + " " + currentMethod);
-    			   //System.out.print(currentClass + "+" + currentMethod);
-    			   //System.out.print(params.size());
     			   for (int i = 0; i < params.size(); ++i) {
     				   paramsTypes.add(symbolTable.get(currentClass + " "
     						   			+ currentMethod + " " + params.get(i))); 
@@ -429,7 +405,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
     			      
     		  } else {
     			  methodReturn.put(currentClass + " " + currentMethod, type);
-    		      //System.out.print(currentClass + " " + currentMethod + " " + type);
     		  }
     	  }
       }
@@ -454,18 +429,12 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
 			  }
 			   
 			  if (paramsTypes.size() != params2Types.size()) {
-				  //System.out.print(paramsTypes.size());
-				 // System.out.print(params2Types.size());
-				  //System.out.print("Type error -28");
-		      	  //System.exit(-28);
 		    	  System.out.print("Type error");
 		    	  System.exit(-1);
 			  }
 			  
 			  for (int i = 0; i < paramsTypes.size(); ++i) {
 	    		  if (!Match(paramsTypes.get(i), params2Types.get(i))) {
-			    	  //System.out.print("Type error -27");
-			      	  //System.exit(-27);
 	    	    	  System.out.print("Type error");
 	    	    	  System.exit(-1);
 	    		  }
@@ -482,8 +451,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f11.accept(this);
       n.f12.accept(this);
       
-     
-      //System.out.print("method " + type + " : " + n.f2.f0.toString());
       return _ret;
    }
 
@@ -507,12 +474,9 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String type = (String)n.f0.accept(this);
       n.f1.accept(this);
       if (!globalFlag && (!onlyForExtends || (onlyForExtends && enteringExtends))) {
-    	  //System.out.print("PPP " + currentClass + " " + currentMethod);
     	  arguments.get(currentClass + " " + currentMethod).add(n.f1.f0.toString());
-    	  //System.out.print("PPP " + arguments.get(currentClass + " " + currentMethod));
     	  symbolTable.put(currentClass + " " + currentMethod + " " + n.f1.f0.toString(),
     			  			type);
-    	  //System.out.print(type + " : " + n.f1.f0.toString());
       }
       return _ret;
    }
@@ -624,20 +588,7 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
 		  if (symbolTable.get(currentClass + " " + " " + var) != null) {
 		    	  type1 = symbolTable.get(currentClass + " " + " " + var);
 		  }
-		  /*
-		  if (FindExtend(type1, type2)) {
-			  if (flag) {
-				  symbolTable.put(currentClass + " " + currentMethod + " "
-						          + var, type2);
-			  } else {
-				  symbolTable.put(currentClass + " " +  " " + var, type2);
-			  }
-		  }*/
 	      if ((type1 != type2) && !(FindExtend(type2, type1))) {
-	    	  //System.out.print(type1);
-	    	  //System.out.print(type2);
-	    	  //System.out.print("Type error -10");
-	      	  //System.exit(-10);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -675,8 +626,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
 		      type1 = symbolTable.get(currentClass + " " + " " + var);
 		  }
 	      if ((type1 != "int[]") || (type2 != "int") || (type3 != "int")) {
-	    	  //System.out.print("Type error -11");
-	      	  //System.exit(-11);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -699,11 +648,7 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f1.accept(this);
       String type = (String)n.f2.accept(this);
       if (globalFlag) {
-    	  //System.out.print(" P " + type);
     	  if (type != "boolean") {
-    		  //System.out.print(type);
-	    	  //System.out.print("Type error -22");
-	    	  //System.exit(-22); 
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
     	  }
@@ -729,9 +674,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String type = (String)n.f2.accept(this);
       if (globalFlag) {
     	  if (type != "boolean") {
-    		  //System.out.print(type);
-	    	  //System.out.print("Type error -23");
-	    	  //System.exit(-23);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
     	  }
@@ -757,8 +699,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String type = (String)n.f2.accept(this);
       if (globalFlag) {
     	  if (type != "int") {
-	    	  //System.out.print("Type error -21");
-	    	  //System.exit(-21);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
     	  }
@@ -798,17 +738,10 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f1.accept(this);
       String type2 = (String)n.f2.accept(this);
 	  if (globalFlag) {
-		  /*
-		  if((type1 == type2) && (type1 == "int")) {
-			  return (R)"int";
-		  }
-		  */
 		  if ((type1 == type2) && (type1 == "boolean")) {
 			  //System.out.print("# " + type1 + " " + type2);
 			  return (R)"boolean";
 		  }
-	      //System.out.print("Type error -2");
-	      //System.exit(-2);
     	  System.out.print("Type error");
     	  System.exit(-1);
 	  }
@@ -828,10 +761,7 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f1.accept(this);
       String rhsType = (String)n.f2.accept(this);
       if (globalFlag) {
-    	  //System.out.print(lhsType + " ^ " + rhsType);
       	  if((lhsType != rhsType) || (lhsType != "int") || (rhsType != "int")) {
-      		  //System.out.print("Type error -3");
-	    	  //System.exit(-3);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -852,8 +782,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String type2 = (String)n.f2.accept(this);
       if (globalFlag) {
 	      if ((type1 != type2) || (type1 != "int")) {
-	    	  //System.out.print("Type error -5");
-	    	  //System.exit(-5);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -874,8 +802,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String type2 = (String)n.f2.accept(this);
       if (globalFlag) {
 	      if ((type1 != type2) || ((type1 != "boolean") && (type1 != "int"))) {
-	    	  //System.out.print("Type error -209");
-	    	  //System.exit(-5);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -896,8 +822,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String type2 = (String)n.f2.accept(this);
       if (globalFlag) {
 	      if ((type1 != type2) || (type1 != "int")) {
-	    	  //System.out.print("Type error -6");
-	    	  //System.exit(-6);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -919,8 +843,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f3.accept(this);
 	  if (globalFlag) {
 	      if ((type1 != "int[]") || (type2 != "int")) {
-	    	  //System.out.print("Type error -7");
-	    	  //System.exit(-7);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -940,8 +862,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f2.accept(this);
       if (globalFlag) {
 	      if (type != "int[]") {
-	    	  //System.out.print("Type error -8");
-	    	  //System.exit(-8);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -949,7 +869,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       return (R)"int";
    }
 
-   // WTF!!!!
    // Should we check whether a method belongs to a particular class
    /**
     * f0 -> PrimaryExpression()
@@ -963,20 +882,15 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       R _ret=null;
       String type2 = new String();
       String type1 = (String)n.f0.accept(this);
-      //System.out.print("***** " + type1);
       n.f1.accept(this);
       n.f2.accept(this);
       String var = n.f2.f0.toString();
       
-      //System.out.print("*****" + methodReturn.get("Tree GetHas_Right"));
       if (globalFlag) {
     	  paramIt = 0;
 	      if (methodReturn.get(type1 + " " + var) != null) {	    	  
 	    	  type2 = methodReturn.get(type1 + " " + var);
 	      } else {
-	    	  //System.out.print(type1 + " " + var);
-	    	  //System.out.print("Type error -14");
-			  //System.exit(-14);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -984,8 +898,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       
       if (globalFlag) {
     	  activationStack.push(type1 + " " + var);
-    	  // callingClassMethod = type1 + " " + var;
-    	  //System.out.print("% " + type1 + " " + var);
       }
       
       n.f3.accept(this);
@@ -994,17 +906,11 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       
       if (globalFlag) {
 	      if (paramIt != arguments.get(type1 + " " + var).size()) {
-	  		  //System.out.print(callingClassMethod);
-	  		//System.out.print(arguments.get(callingClassMethod));
-	  		//System.out.print(paramIt);
-	    	 // System.out.print("Type error -19");
-			 // System.exit(-19);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
 	      paramIt = 0;
 	      activationStack.pop();
-    	  // callingClassMethod = "";
       }
       return (R)type2;
    }
@@ -1020,25 +926,16 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String paramType = (String)n.f0.accept(this);
       
       if (globalFlag) {
-    	  //System.out.print("!! " + callingClassMethod);
     	  String callingFunction = new String();
     	  callingFunction = activationStack.pop();
       	  if (arguments.get(callingFunction) == null) {
-      		  //System.out.print(callingFunction);
-    		  //System.out.print("Type error -15");
-  		  	  //System.exit(-15);
       		System.out.print("Type error");
 		  	  System.exit(-1);
       	  }
       	  paramIt = 0;
     	  
-    	  //System.out.print("! " + callingFunction);
     	  var = arguments.get(callingFunction).get(paramIt);
     	  if (!Match(paramType, symbolTable.get(callingFunction + " " + var))) {
-    		  //System.out.print("*** " + callingFunction + " " + paramType +
-    			//	  " " + symbolTable.get(callingFunction + " " + var));
-    		  //System.out.print("Type error -16");
-  		  	  //System.exit(-16);
     		  System.out.print("Type error");
   		  	  System.exit(-1);
     	  }
@@ -1063,15 +960,11 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
     	  String callingFunction = new String();
     	  callingFunction = activationStack.pop();
     	  if (paramIt > arguments.get(callingFunction).size() - 1) {
-      		 // System.out.print("Type error -17");
-  		  	 // System.exit(-17);
     		  System.out.print("Type error");
   		  	  System.exit(-1);
     	  }
     	  var = arguments.get(callingFunction).get(paramIt);
     	  if (!Match(paramType, symbolTable.get(callingFunction + " " + var))) {
-      		  //System.out.print("Type error -18");
-  		  	  //System.exit(-18);
     		  System.out.print("Type error");
   		  	  System.exit(-1);
     	  }
@@ -1096,7 +989,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
    public R visit(PrimaryExpression n) {
       R _ret=null;
       String type = (String)n.f0.accept(this);
-      //System.out.print("### " + type);
       if (allocationFlag) {
     	  allocationFlag = false;
     	  return (R)type;
@@ -1111,7 +1003,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       }
       if ((type != "int") && (type != "boolean") && (type != "int[]")) {
 	      if (globalFlag) {
-      		  //System.out.print("PP" + currentClass + ":" + currentMethod + ":" +type);
       		  if (symbolTable.get(currentClass + " " + currentMethod + " " + type)
       				  != null) {
      	    	  return (R)symbolTable.get(currentClass + " " + currentMethod
@@ -1120,9 +1011,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       		  if (symbolTable.get(currentClass + " " + " " + type) != null) {
      	    	  return (R)symbolTable.get(currentClass + " " + " " + type);
      	      }
-      		  //System.out.print(currentClass + ":" + currentMethod + ":" +type);
-      		  //System.out.print("Type error -9");
-  		  	  //System.exit(-9);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -1193,8 +1081,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       n.f4.accept(this);
       if (globalFlag) {
 	      if (type != "int") {
-	    	  //System.out.print("Type error -1");
-	    	  //System.exit(-1);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
@@ -1217,8 +1103,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
     		  allocationFlag = true;
     		  return (R)var;
     	  }
-		  //System.out.print("Type error -12");
-    	  //System.exit(-12);
     	  System.out.print("Type error");
     	  System.exit(-1);
       } 
@@ -1237,9 +1121,6 @@ public class TypeChecker<R> implements GJNoArguVisitor<R> {
       String type = (String)n.f1.accept(this);
       if (globalFlag) {
 	      if (type != "boolean") {
-	    	  //System.out.print(type);
-	    	  //System.out.print("Type error -25");
-	    	  //System.exit(-25);
 	    	  System.out.print("Type error");
 	    	  System.exit(-1);
 	      }
